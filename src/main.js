@@ -6,6 +6,23 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
 import './style.css'
 
+// -----------------------------------
+// START SCREEN TEXT DELAY
+// -----------------------------------
+
+window.addEventListener('DOMContentLoaded', () => {
+
+  const pressText = document.getElementById('pressStart')
+
+  if(pressText){
+    setTimeout(() => {
+      pressText.classList.remove('hidden')
+      pressText.classList.add('visible')
+    }, 3000) // 3 segundos
+  }
+
+})
+
 
 // -----------------------------------
 // ESCENA
