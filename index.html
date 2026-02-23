@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Drone Brand Prototype</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <div id="startScreen">
+    <div class="title">
+    <h1>RAIMON ESPITALIER</h1>
+    <p>space to start</p>
+    </div>
+    </div>
+    <div id="interactionText" class="hidden">E to interact</div>
+
+<div id="productOverlay" class="hidden">
+  <div class="overlayContent">
+    <img id="productImage" src="/images/imagen1.png" />
+    <img id="flipButton" src="/images/imagenboton.png" />
+  </div>
+</div>
+
+    <!-- Overlay Producto -->
+    <div id="productOverlay" class="hidden">
+      <div class="overlayContent">
+        <button id="closeOverlay">X</button>
+        <canvas id="productViewer"></canvas>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
