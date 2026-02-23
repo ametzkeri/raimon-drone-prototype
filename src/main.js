@@ -57,12 +57,12 @@ function unlockAudio() {
   }
 }
 
-audioLoader.load('/sounds/ENCENDIDO.wav', (buffer) => {
+audioLoader.load('/sounds/ENCENDIDO.mp3', (buffer) => {
   startupSound.setBuffer(buffer)
   startupSound.setVolume(0.05)
 })
 
-audioLoader.load('/sounds/RUIDO.wav', (buffer) => {
+audioLoader.load('/sounds/RUIDO.mp3', (buffer) => {
   motorSound.setBuffer(buffer)
   motorSound.setLoop(true)
   motorSound.setVolume(0)
