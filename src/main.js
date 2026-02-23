@@ -342,8 +342,20 @@ if (camiseta) {
   dronePass.uniforms.flash.value = flashValue
   dronePass.uniforms.fade.value = fadeValue
 
+  if(engineStarted){
+
   if(keys['a']) camera.rotation.y += rotationSpeed
   if(keys['d']) camera.rotation.y -= rotationSpeed
+
+  const forward = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion)
+
+  if(keys['w']) velocity.add(forward.clone().multiplyScalar(acceleration))
+  if(keys['s']) velocity.add(forward.clone().multiplyScalar(-acceleration))
+
+  if(keys[' ']) camera.position.y += 0.6
+  if(keys['shift']) camera.position.y -= 0.6
+
+}
 
   const forward = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion)
 
