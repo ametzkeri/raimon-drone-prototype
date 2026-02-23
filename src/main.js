@@ -96,7 +96,8 @@ const DroneShader = {
     time: { value: 0 },
     fade: { value: 0 },
     night: { value: 0 },
-    flash: { value: 1 }
+    flash: { value: 1 },
+    glitch: { value: 0 },
   },
 
   vertexShader: `
@@ -113,6 +114,7 @@ uniform float time;
 uniform float fade;
 uniform float night;
 uniform float flash;
+uniform float glitch;
 varying vec2 vUv;
 
 float random(vec2 uv){
@@ -122,16 +124,15 @@ float random(vec2 uv){
 void main(){
 
   vec2 uv = vUv;
-  // --- Rolling shutter leve ---
-float rollStrength = 0.0005;   // MUY bajo
-float rollSpeed = 2.0;
 
-uv.x += sin(uv.y * 8.0 + time * rollSpeed) * rollStrength;
+  float rollStrength = 0.0005;
+  float rollSpeed = 2.0;
+  uv.x += sin(uv.y * 8.0 + time * rollSpeed) * rollStrength;
 
-  // Imagen base normal (SIN pixelado duro)
+  // Imagen base
   vec4 base = texture2D(tDiffuse, uv);
 
-  // Blur óptico leve tipo cámara DV
+  // Blur DV
   vec4 blur =
     texture2D(tDiffuse, uv + vec2(0.0015, 0.0)) +
     texture2D(tDiffuse, uv - vec2(0.0015, 0.0)) +
@@ -140,38 +141,44 @@ uv.x += sin(uv.y * 8.0 + time * rollSpeed) * rollStrength;
 
   blur *= 0.25;
 
+  // 👇 DECLARAMOS COLOR AQUÍ
   vec4 color = mix(base, blur, 0.25);
+
+  // -------- GLITCH --------
+  if(glitch > 0.5){
+
+    float shift = 0.003;
+
+    vec4 r = texture2D(tDiffuse, uv + vec2(shift, 0.0));
+    vec4 g = texture2D(tDiffuse, uv);
+    vec4 b = texture2D(tDiffuse, uv - vec2(shift, 0.0));
+
+    color = vec4(r.r, g.g, b.b, 1.0);
+
+    color.rgb += random(uv + time) * 0.05;
+  }
 
   if(night > 0.5){
 
     float gray = dot(color.rgb, vec3(0.299,0.587,0.114));
     vec3 green = vec3(0.45,1.0,0.5) * gray * 2.5;
-
-    float noise = random(uv + time * 0.5) * 0.05;
-    green += noise;
-
+    green += random(uv + time * 0.5) * 0.05;
     color.rgb = green;
 
   } else {
 
-    // Gamma ligeramente plana
     color.rgb = pow(color.rgb, vec3(1.1));
 
-    // Saturación reducida leve
     float gray = dot(color.rgb, vec3(0.3,0.59,0.11));
     color.rgb = mix(color.rgb, vec3(gray), 0.1);
 
-    // Banding MUY leve (no pixel)
     color.rgb = floor(color.rgb * 128.0) / 128.0;
 
-    // Ruido fino tipo CCD
     float noise = random(uv + time * 0.4) * 0.015;
     color.rgb += noise;
 
-    // Elevación suave de negros
     color.rgb = mix(color.rgb, vec3(0.05), 0.05);
 
-    // Scanlines casi invisibles
     float scan = sin(uv.y * 800.0) * 0.008;
     color.rgb -= scan;
   }
@@ -285,42 +292,6 @@ loader.load('/models/drone.glb', (gltf) => {
 // -----------------------------------
 
 const keys = {}
-
-window.addEventListener('keydown', e => {
-
-  const key = e.key.toLowerCase()
-  keys[key] = true
-
-  const validKeys = ['w','a','s','d',' ','shift']
-
-  if(!engineStarted && validKeys.includes(key)){
-
-    engineStarted = true
-
-    // AUDIO
-    const ctx = listener.context
-    if(ctx.state === 'suspended'){
-      ctx.resume()
-    }
-
-    startupSound.play()
-    motorSound.setVolume(0)
-    motorSound.play()
-    motorVolume = 0
-
-    // FADE OUT PANTALLA
-    const startScreen = document.getElementById('startScreen')
-
-  if(startScreen){
-  startScreen.style.transition = "opacity 0.8s ease"
-  startScreen.style.opacity = "0"
-
-  setTimeout(()=>{
-    startScreen.style.display = "none"
-  }, 800)
-}
-  }
-})
 
 window.addEventListener('keyup', e => {
   keys[e.key.toLowerCase()] = false
@@ -455,6 +426,19 @@ window.addEventListener('keydown', e => {
 
     nightVisionOn = !nightVisionOn
     dronePass.uniforms.night.value = nightVisionOn ? 1 : 0
+
+    const hint = document.getElementById('nightHint')
+
+hint.classList.add('glitch')
+dronePass.uniforms.glitch.value = 1
+
+setTimeout(() => {
+  dronePass.uniforms.glitch.value = 0
+}, 180)
+
+setTimeout(() => {
+  hint.classList.remove('glitch')
+}, 250)
 
     if(nightVisionOn){
       ambient.intensity = 0.6
