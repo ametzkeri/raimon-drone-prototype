@@ -1,9 +1,11 @@
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
 import './style.css'
+
 
 // -----------------------------------
 // ESCENA
@@ -201,6 +203,11 @@ scene.add(sun)
 // -----------------------------------
 
 const loader = new GLTFLoader()
+
+const dracoLoader = new DRACOLoader()
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/')
+
+loader.setDRACOLoader(dracoLoader)
 let map
 let mapBounds = { minX: -100, maxX: 100, minZ: -100, maxZ: 100 }
 
